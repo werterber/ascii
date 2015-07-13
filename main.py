@@ -14,13 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+"""
+ █████╗ ███████╗ ██████╗██╗██╗     █████╗ ██████╗ ████████╗
+██╔══██╗██╔════╝██╔════╝██║██║    ██╔══██╗██╔══██╗╚══██╔══╝
+███████║███████╗██║     ██║██║    ███████║██████╔╝   ██║   
+██╔══██║╚════██║██║     ██║██║    ██╔══██║██╔══██╗   ██║   
+██║  ██║███████║╚██████╗██║██║    ██║  ██║██║  ██║   ██║   
+╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝╚═╝    ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   
+ """                                                          
+
 import webapp2
 import os
 import jinja2
+from google.appengine.ext import db
 
-dir_name = os.path.join(os.path.dirname(__file__), 'templates')
+dir_template = os.path.join(os.path.dirname(__file__), 'templates')
 env_jinja = jinja2.Environment(
-	loader = jinja2.FileSystemLoader(dir_name), 
+	loader = jinja2.FileSystemLoader(dir_template), 
 	autoescape = True)
 
 class Handler(webapp2.RequestHandler):
@@ -35,11 +45,22 @@ class Handler(webapp2.RequestHandler):
 		self.write(self.render_str(template, **kw))
 
 
-
-
 class MainHandler(Handler):
+    def render_front(self, title = "", art = "", error = ""):
+    	self.render("front.html", title = title, art = art, error = error)
+
     def get(self):
-        self.render('main.html')
+        self.render_front()
+
+    def post(self):
+    	title = self.request.get('title')
+    	art = self.request.get('art')
+
+    	if title and art:
+    		self.write("thanks")
+    	else:
+    		error = "We need both title and ascii art."
+    		self.render_front(title, art, error)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
