@@ -14,14 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""
- █████╗ ███████╗ ██████╗██╗██╗     █████╗ ██████╗ ████████╗
-██╔══██╗██╔════╝██╔════╝██║██║    ██╔══██╗██╔══██╗╚══██╔══╝
-███████║███████╗██║     ██║██║    ███████║██████╔╝   ██║   
-██╔══██║╚════██║██║     ██║██║    ██╔══██║██╔══██╗   ██║   
-██║  ██║███████║╚██████╗██║██║    ██║  ██║██║  ██║   ██║   
-╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝╚═╝    ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   
- """                                                          
+                                                                                              
 
 import webapp2
 import os
@@ -32,6 +25,16 @@ dir_template = os.path.join(os.path.dirname(__file__), 'templates')
 env_jinja = jinja2.Environment(
 	loader = jinja2.FileSystemLoader(dir_template), 
 	autoescape = True)
+#Database:
+
+class Art(db.Model):
+	title = db.StringProperty(required= True)
+	art = db.TextProperty(required = True)
+	created = db.DateTimeProperty(auto_now_add = True)
+		
+
+
+#Handlers:
 
 class Handler(webapp2.RequestHandler):
 	def write(self, *a, **kw):
@@ -47,7 +50,9 @@ class Handler(webapp2.RequestHandler):
 
 class MainHandler(Handler):
     def render_front(self, title = "", art = "", error = ""):
-    	self.render("front.html", title = title, art = art, error = error)
+    	arts = db.GqlQuery("SELECT * FROM Art ORDER BY created DESC")
+
+    	self.render("front.html", title = title, art = art, error = error, arts = arts)
 
     def get(self):
         self.render_front()
@@ -57,7 +62,10 @@ class MainHandler(Handler):
     	art = self.request.get('art')
 
     	if title and art:
-    		self.write("thanks")
+    		a = Art(title = title, art = art)
+    		a.put()
+
+    		self.redirect('/')
     	else:
     		error = "We need both title and ascii art."
     		self.render_front(title, art, error)

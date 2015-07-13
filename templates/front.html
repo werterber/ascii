@@ -20,5 +20,14 @@
 		</lable>
 	</form>
 
+	<hr>
+
+	{% for piece in arts %}
+		<div class="art">
+			<div class="art-title">{{piece.title}}</div>
+			<pre class="art-body">{{piece.art}}</pre>
+		</div>
+	{% endfor %}
+
 {% endblock %}
 
